@@ -1,0 +1,107 @@
+import numpy as np
+import pandas as pd
+
+link="corona_tested.csv"
+df = pd.read_csv(link,header=0)
+
+df.head()
+df.drop(['test_date','test_indication'],axis=1,inplace=True)
+df
+
+df.info()
+
+df.isnull().sum()
+
+df[df.isnull().any(axis=1)]
+
+df[df.notnull().all(axis=1)]
+
+df.dropna(inplace=True)
+df
+
+df[df.isnull().any(axis=1)]
+
+df.corr()
+
+df['age_60_and_above'].replace({'No':'0','Yes':'1'},inplace=True)
+df['age_60_and_above']=pd.to_numeric(df['age_60_and_above'])
+df['gender'].replace({'male':'0','female':1},inplace=True)
+df['gender']=pd.to_numeric(df['gender'])
+
+df.eq("other").sum()
+
+df[['cough','fever','sore_throat','shortness_of_breath','head_ache','corona_result','age_60_and_above','gender'
+   ]]=df[['cough','fever','sore_throat','shortness_of_breath','head_ache','corona_result','age_60_and_above','gender'
+   ]].replace('other',np.NaN)
+
+df
+
+df.dropna(inplace=True)
+
+df['corona_result'].replace({'negative':'0','positive':'1'},inplace=True)
+
+df['corona_result']=pd.to_numeric(df['corona_result'])
+
+df.info()
+
+df.corr()
+
+import seaborn as sns
+
+sns.heatmap(df.corr())
+
+feature_names = df.corr().nlargest(5,'corona_result').index.tolist()
+
+df.corr().nlargest(5,'corona_result').index.tolist()
+
+from sklearn import linear_model
+from sklearn.model_selection import cross_val_score
+
+
+X=df[['head_ache','fever','cough','sore_throat']]
+y=df.iloc[:, 5]
+
+X
+y
+
+log_reg=linear_model.LogisticRegression()
+log_rec_score=cross_val_score(log_reg,X,y,cv=10,scoring='accuracy').mean()
+log_rec_score
+
+results=[]
+results.append(log_rec_score)
+
+results
+
+from sklearn import svm
+
+linear_svm=svm.SVC(kernel='linear')
+
+linear_svm_score=cross_val_score(linear_svm,X,y,cv=10,
+                                scoring='accuracy').mean()
+
+
+linear_svm_score
+
+results.append(linear_svm_score)
+
+results
+
+import pickle 
+
+name='corona_tested.csv'
+
+log_reg.fit(X,y)
+pickle.dump(log_reg,open(name,'wb'))
+
+loaded_model=pickle.load(open(name,'rb'))
+
+loaded_model
+
+head_ache=0
+fever=1
+cough=1
+sore_throat=0
+prediction = loaded_model.predict([[head_ache ,fever ,cough,sore_throat]])
+
+prediction
